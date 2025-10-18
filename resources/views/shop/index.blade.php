@@ -25,8 +25,13 @@
                         class="border rounded hover:shadow transition p-3 block">
                         <div class="h-30 w-30 bg-gray-100 flex items-center justify-center overflow-hidden rounded">
                             @if($p->image_path)
-                                <img src="{{ asset('storage/'.$p->image_path) }}"
-                                     alt="{{ $p->name }}" class="object-cover h-20 w-20">
+                               <img src="{{ asset('storage/' . $p->image_path) }}" 
+     alt="{{ $p->name }}" 
+     class="object-cover h-20 w-20">
+
+
+
+
                             @else
                                 <span class="text-gray-400 text-sm">Tidak ada gambar</span>
                             @endif
