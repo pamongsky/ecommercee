@@ -35,6 +35,38 @@
                             {{ __('Home') }}
                         </x-nav-link>
                     @endauth
+
+                    @php
+    $isAdmin = auth()->check() && auth()->user()->role === 'admin';
+@endphp
+
+{{-- Tampilkan menu khusus user non-admin --}}
+@if(!$isAdmin)
+    <x-nav-link :href="route('shop.index')" :active="request()->routeIs('shop.index')">
+        {{ __('Shop') }}
+    </x-nav-link>
+
+    @if(Route::has('cart.index'))
+        <x-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.*')">
+            🛒 {{ __('Keranjang') }}
+            @php
+                $cartCount = session('cart') ? collect(session('cart'))->sum('qty') : 0;
+            @endphp
+            @if($cartCount > 0)
+                <span class="ml-1 bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    {{ $cartCount }}
+                </span>
+            @endif
+        </x-nav-link>
+    @endif
+
+    @auth
+        <x-nav-link :href="route('my.orders.index')" :active="request()->routeIs('my.orders.*')">
+            📦 {{ __('Pesanan Saya') }}
+        </x-nav-link>
+    @endauth
+@endif
+
                 </div>
             </div>
 
@@ -104,6 +136,37 @@
                     {{ __('Home') }}
                 </x-responsive-nav-link>
             @endauth
+
+            @php
+    $isAdmin = auth()->check() && auth()->user()->role === 'admin';
+@endphp
+
+@if(!$isAdmin)
+    <x-responsive-nav-link :href="route('shop.index')" :active="request()->routeIs('shop.index')">
+        {{ __('Shop') }}
+    </x-responsive-nav-link>
+
+    @if(Route::has('cart.index'))
+        <x-responsive-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.*')">
+            {{ __('Keranjang') }}
+            @php
+                $cartCount = session('cart') ? collect(session('cart'))->sum('qty') : 0;
+            @endphp
+            @if($cartCount > 0)
+                <span class="ml-2 inline-block bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full align-middle">
+                    {{ $cartCount }}
+                </span>
+            @endif
+        </x-responsive-nav-link>
+    @endif
+
+    @auth
+        <x-responsive-nav-link :href="route('my.orders.index')" :active="request()->routeIs('my.orders.*')">
+            {{ __('Pesanan Saya') }}
+        </x-responsive-nav-link>
+    @endauth
+@endif
+
         </div>
 
         <!-- Responsive Settings Options -->
