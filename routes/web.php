@@ -3,6 +3,17 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ShopController;
+<<<<<<< Updated upstream
+=======
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Middleware\IsAdmin; 
+use App\Http\Controllers\MyOrderController as UserOrderController; 
+
+use App\Http\Controllers\CartController; 
+use App\Http\Controllers\CheckoutController;
+>>>>>>> Stashed changes
+
+use app\Http\Controllers\Admin\ProductController;
 
 
 Route::get('/dashboard', function () {
