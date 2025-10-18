@@ -11,10 +11,16 @@
         <p>Selamat datang, {{ auth()->user()->name }} (Admin)</p>
 
         <div class="space-x-4">
-            <a href="{{ route('admin.products.index') }}"
+            <a href="{{ route('shop.index') }}"
                class="px-4 py-2 bg-blue-600 text-black rounded">
                Kelola Produk
             </a>
+
+             <a href="{{ route('shop.index') }}"
+   class="px-4 py-2 bg-gray-600 text-black rounded hover:bg-gray-700">
+  Dashboard Utama
+</a>
+
 
            
             <a href="{{ route('admin.categories.index') }}"
