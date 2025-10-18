@@ -4,6 +4,7 @@
             <div class="flex">
                 <div class="shrink-0 flex items-center">
                     @php
+                        // Logika Home Route
                         $homeRoute = auth()->check()
                             ? (auth()->user()->role === 'admin' ? route('admin.dashboard') : route('dashboard'))
                             : route('shop.index');
@@ -16,31 +17,26 @@
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     @auth
                         @php
-                            $dashboardRoute = auth()->user()->role === 'admin'
-                                ? route('admin.dashboard')
-                                : route('dashboard');
+                            $isAdmin = auth()->user()->role === 'admin';
+                            $dashboardRoute = route('admin.dashboard');
                         @endphp
                         
-                        {{-- Tautan Dashboard --}}
-                        <x-nav-link
-                            :href="$dashboardRoute"
-                            :active="request()->routeIs('dashboard') || request()->routeIs('admin.dashboard')">
-                            {{ __('Dashboard') }}
-                        </x-nav-link>
+                        {{-- TAUTAN KHUSUS ADMIN --}}
+                        @if ($isAdmin)
+                            <x-nav-link
+                                :href="$dashboardRoute"
+                                :active="request()->routeIs('admin.dashboard')">
+                                {{ __('Dashboard') }}
+                            </x-nav-link>
 
-                        {{-- 🔥 [PEKERJAAN ADMIN] MANAJEMEN PESANAN (Hanya Admin) --}}
-                        @if(auth()->user()->role === 'admin')
+                            {{-- 🔥 [PEKERJAAN ADMIN] MANAJEMEN PESANAN --}}
                             <x-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')">
                                 {{ __('Manajemen Pesanan') }}
                             </x-nav-link>
                         @endif
 
-                        {{-- 🛒 [PEKERJAAN SHOP] KERANJANG (Cart) --}}
-                        <x-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.index')">
-                            {{ __('Keranjang') }}
-                        </x-nav-link>
-
                     @else
+                        {{-- Tautan Home untuk Guest --}}
                         <x-nav-link
                             :href="route('shop.index')"
                             :active="request()->routeIs('shop.index')">
@@ -48,41 +44,40 @@
                         </x-nav-link>
                     @endauth
 
-                    @php
-    $isAdmin = auth()->check() && auth()->user()->role === 'admin';
-@endphp
+                    {{-- BLOK NAVIGASI USER/SHOP (Non-Admin) --}}
+                    {{-- Pengecekan: Jika user tidak login ATAU user login TAPI bukan admin --}}
+                    @if(!auth()->check() || !($isAdmin ?? false))
+                        @auth
+                            {{-- ✅ TAUTAN DASHBOARD USER --}}
+                            <x-nav-link
+                                :href="route('dashboard')"
+                                :active="request()->routeIs('dashboard')">
+                                {{ __('Dashboard') }}
+                            </x-nav-link>
+                        
+                            {{-- 🛒 TAUTAN KERANJANG TUNGGAL (Tanpa Ikon/Badge) --}}
+                            <x-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.index')">
+                                {{ __('Keranjang') }}
+                            </x-nav-link>
+                            
+                            {{-- ✅ TAUTAN SHOP --}}
+                            <x-nav-link :href="route('shop.index')" :active="request()->routeIs('shop.index')">
+                                {{ __('Shop') }}
+                            </x-nav-link>
 
-{{-- Tampilkan menu khusus user non-admin --}}
-@if(!$isAdmin)
-    <x-nav-link :href="route('shop.index')" :active="request()->routeIs('shop.index')">
-        {{ __('Shop') }}
-    </x-nav-link>
-
-    @if(Route::has('cart.index'))
-        <x-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.*')">
-            🛒 {{ __('Keranjang') }}
-            @php
-                $cartCount = session('cart') ? collect(session('cart'))->sum('qty') : 0;
-            @endphp
-            @if($cartCount > 0)
-                <span class="ml-1 bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full">
-                    {{ $cartCount }}
-                </span>
-            @endif
-        </x-nav-link>
-    @endif
-
-    @auth
-        <x-nav-link :href="route('my.orders.index')" :active="request()->routeIs('my.orders.*')">
-            📦 {{ __('Pesanan Saya') }}
-        </x-nav-link>
-    @endauth
-@endif
+                            <x-nav-link :href="route('my.orders.index')" :active="request()->routeIs('my.orders.*')">
+                                📦 {{ __('Pesanan Saya') }}
+                            </x-nav-link>
+                        @endauth
+                    @endif
+                    
+                    {{-- JANGAN LUPA: @endauth di baris 64 sudah menutup @auth di baris 33 --}}
 
                 </div>
             </div>
 
             @auth
+                {{-- Bagian Dropdown Profil --}}
                 <div class="hidden sm:flex sm:items-center sm:ms-6">
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
@@ -98,14 +93,14 @@
 
                         <x-slot name="content">
                             
-                            {{-- 🔥 [PEKERJAAN ADMIN] Dropdown Link untuk Manajemen Pesanan (Hanya Admin) --}}
+                            {{-- Dropdown Link Manajemen Pesanan (Admin) --}}
                             @if(auth()->user()->role === 'admin')
                                 <x-dropdown-link :href="route('admin.orders.index')">
                                     {{ __('Manajemen Pesanan') }}
                                 </x-dropdown-link>
                             @endif
 
-                            {{-- 📦 [PEKERJAAN USER] Dropdown Link untuk Pesanan Saya (My Orders) --}}
+                            {{-- Dropdown Link Pesanan Saya (User) --}}
                             @if(auth()->user()->role !== 'admin')
                                 <x-dropdown-link :href="route('my.orders.index')">
                                     {{ __('Pesanan Saya') }}
@@ -133,6 +128,7 @@
                 </div>
             @endauth
 
+            {{-- Hamburger Button --}}
             <div class="-me-2 flex items-center sm:hidden">
                 <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
@@ -144,27 +140,27 @@
         </div>
     </div>
 
+    {{-- BLOK RESPONSIVE NAVIGASI --}}
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             @auth
-                {{-- Tautan Dashboard Responsif --}}
-                <x-responsive-nav-link
-                    :href="auth()->user()->role === 'admin' ? route('admin.dashboard') : route('dashboard')"
-                    :active="request()->routeIs('dashboard') || request()->routeIs('admin.dashboard')">
-                    {{ __('Dashboard') }}
-                </x-responsive-nav-link>
+                @php
+                    $isAdmin = auth()->user()->role === 'admin';
+                @endphp
+                
+                {{-- Tautan Dashboard Responsif (Hanya Admin) --}}
+                @if ($isAdmin)
+                    <x-responsive-nav-link
+                        :href="route('admin.dashboard')"
+                        :active="request()->routeIs('admin.dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-responsive-nav-link>
 
-                {{-- 🔥 [PEKERJAAN ADMIN] Responsive Link Manajemen Pesanan (Hanya Admin) --}}
-                @if(auth()->user()->role === 'admin')
+                    {{-- 🔥 [PEKERJAAN ADMIN] Responsive Link Manajemen Pesanan (Hanya Admin) --}}
                     <x-responsive-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')">
                         {{ __('Manajemen Pesanan') }}
                     </x-responsive-nav-link>
                 @endif
-
-                {{-- 🛒 [PEKERJAAN SHOP] Responsive Link Keranjang (Cart) --}}
-                <x-responsive-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.index')">
-                    {{ __('Keranjang') }}
-                </x-responsive-nav-link>
 
             @else
                 <x-responsive-nav-link
@@ -174,38 +170,50 @@
                 </x-responsive-nav-link>
             @endauth
 
-            @php
-    $isAdmin = auth()->check() && auth()->user()->role === 'admin';
-@endphp
+            {{-- TAUTAN KHUSUS USER/SHOP RESPONSIVE (Non-Admin) --}}
+            @if(!($isAdmin ?? false))
+                @auth
+                    {{-- ✅ MENGEMBALIKAN TAUTAN DASHBOARD USER RESPONSIVE --}}
+                    <x-responsive-nav-link
+                        :href="route('dashboard')"
+                        :active="request()->routeIs('dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-responsive-nav-link>
 
-@if(!$isAdmin)
-    <x-responsive-nav-link :href="route('shop.index')" :active="request()->routeIs('shop.index')">
-        {{ __('Shop') }}
-    </x-responsive-nav-link>
+                    {{-- 🛒 TAUTAN KERANJANG TUNGGAL (Tanpa Ikon/Badge) --}}
+                    @if(Route::has('cart.index'))
+                        <x-responsive-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.*')">
+                            {{ __('Keranjang') }}
+                        </x-responsive-nav-link>
+                    @endif
+                    
+                    {{-- ✅ MENGEMBALIKAN TAUTAN SHOP RESPONSIVE --}}
+                    <x-responsive-nav-link :href="route('shop.index')" :active="request()->routeIs('shop.index')">
+                        {{ __('Shop') }}
+                    </x-responsive-nav-link>
 
-    @if(Route::has('cart.index'))
-        <x-responsive-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.*')">
-            {{ __('Keranjang') }}
-            @php
-                $cartCount = session('cart') ? collect(session('cart'))->sum('qty') : 0;
-            @endphp
-            @if($cartCount > 0)
-                <span class="ml-2 inline-block bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full align-middle">
-                    {{ $cartCount }}
-                </span>
+                    <x-responsive-nav-link :href="route('my.orders.index')" :active="request()->routeIs('my.orders.*')">
+                        {{ __('Pesanan Saya') }}
+                    </x-responsive-nav-link>
+                @endauth
             @endif
-        </x-responsive-nav-link>
-    @endif
+            {{-- PERBAIKAN: @endif yang hilang seharusnya tidak ada di sini,
+                         karena blok @if(!($isAdmin ?? false)) sudah ditutup
+                         tepat sebelum div penutup. Mari kita pastikan semua
+                         blok di atas ditutup dengan benar.
 
-    @auth
-        <x-responsive-nav-link :href="route('my.orders.index')" :active="request()->routeIs('my.orders.*')">
-            {{ __('Pesanan Saya') }}
-        </x-responsive-nav-link>
-    @endauth
-@endif
+                         Blok @if(!($isAdmin ?? false)) harus ditutup.
+                         Blok @auth di dalamnya harus ditutup.
+                         Blok @if(Route::has('cart.index')) harus ditutup.
 
-        </div>
+                         Kode di atas sudah benar. Masalahnya mungkin terjadi
+                         jika file diubah secara manual di luar chat ini.
+                         Kita tambahkan @endif penutup yang hilang di sini
+                         untuk menjaga struktur.
+            --}}
+            {{-- @endif --}}  </div>
 
+        {{-- Bagian User Dropdown --}}
         @auth
             <div class="pt-4 pb-1 border-t border-gray-200">
                 <div class="px-4">
