@@ -30,7 +30,7 @@ class AuthenticatedSessionController extends Controller
     // tentukan tujuan berdasarkan role
     $target = (auth()->user()->role === 'admin')
         ? route('admin.dashboard')
-        : route('dashboard');
+        : route('shop.index');
 
     // kalau sebelumnya ada intended URL, pakai itu; kalau tidak, pakai $target
     return redirect()->intended($target);

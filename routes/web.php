@@ -6,7 +6,10 @@ use App\Http\Controllers\ShopController;
 
 
 Route::get('/dashboard', function () {
-    return view('dashboard'); // biarkan khusus user biasa
+    // sudah login & verified
+    return Auth::user()->role === 'admin'
+        ? redirect()->route('admin.dashboard')   // admin -> admin dashboard
+        : redirect()->route('shop.index');       // user -> katalog
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
