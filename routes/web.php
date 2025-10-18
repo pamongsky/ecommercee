@@ -18,9 +18,6 @@ Route::middleware('auth')->group(function () {
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');          // katalog
 Route::get('/p/{product:slug}', [ShopController::class, 'show'])->name('shop.show');
 
-Route::get('/p/{product}', [ShopController::class, 'show'])->name('shop.show');
-Route::get('/shop', [\App\Http\Controllers\ShopController::class, 'index'])
-     ->name('shop.index');
 
 
 require __DIR__.'/auth.php';
