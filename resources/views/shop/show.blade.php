@@ -9,9 +9,9 @@
     <div class="p-6 grid md:grid-cols-2 gap-6">
         <div class="border rounded p-4">
             @if($product->image_path)
-                <img src="{{ asset('storage/'.$product->image_path) }}" alt="{{ $product->name }}" class="w-20 h-20 object-cover rounded">
+                <img src="{{ asset('storage/'.$product->image_path) }}" alt="{{ $product->name }}" class="w-full h-auto object-cover rounded">
             @else
-                <div class="w-20 h-20 flex items-center justify-center bg-gray-100 rounded">
+                <div class="w-22 h-22 flex items-center justify-center bg-gray-100 rounded">
                     <span class="text-gray-400">Tidak ada gambar</span>
                 </div>
             @endif
