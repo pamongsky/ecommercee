@@ -11,7 +11,7 @@
         <p>Selamat datang, {{ auth()->user()->name }} (Admin)</p>
 
         <div class="space-x-4">
-            <a href="{{ route('shop.index') }}"
+            <a href="{{ route('admin.products.index') }}"
                class="px-4 py-2 bg-blue-600 text-black rounded">
                Kelola Produk
             </a>
