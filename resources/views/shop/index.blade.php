@@ -32,10 +32,10 @@
                 @foreach($products as $p)
                     <div class="border rounded hover:shadow transition p-3">
                         <a
-                          {{-- Opsi A: pakai binding model --}}
-                          href="{{ route('shop.show', $p) }}"
-                          {{-- Opsi B: pakai id -> href="{{ route('shop.show', ['product' => $p->id]) }}" --}}
-                          class="block"
+                            {{-- Opsi A: pakai binding model --}}
+                            href="{{ route('shop.show', $p) }}"
+                            {{-- Opsi B: pakai id -> href="{{ route('shop.show', ['product' => $p->id]) }}" --}}
+                            class="block"
                         >
                             {{-- Kotak gambar rasio 1:1 --}}
                             <div class="w-full aspect-square bg-gray-100 overflow-hidden rounded">
@@ -55,17 +55,23 @@
 
                             <div class="mt-3 font-semibold line-clamp-2">{{ $p->name }}</div>
                             <div class="text-sm text-gray-500">{{ $p->category->name }}</div>
-                            <div class="mt-1 font-bold">Rp {{ $p->price_formatted }}</div>
+                            {{-- Memperbaiki harga agar formatnya benar, karena $p->price_formatted mungkin tidak ada --}}
+                            <div class="mt-1 font-bold">Rp {{ number_format($p->price, 0, ',', '.') }}</div>
                             <div class="text-xs text-gray-500">Stok: {{ $p->stock }}</div>
                         </a>
 
                         {{-- (Opsional) tombol tambah ke keranjang --}}
+                        {{-- BLOK INI DINONAKTIFKAN KARENA ROUTE cart.add BELUM DIDEFINISIKAN/AKTIF --}}
+                        @if (false) 
                         <form action="{{ route('cart.add', $p) }}" method="POST" class="mt-3">
                             @csrf
                             <button class="w-full px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-sm">
                                 + Keranjang
                             </button>
                         </form>
+                        @endif 
+                        {{-- END OF BLOK NONAKTIF --}}
+                        
                     </div>
                 @endforeach
             </div>
