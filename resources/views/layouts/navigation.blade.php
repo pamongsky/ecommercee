@@ -39,7 +39,18 @@
                             {{ __('Dashboard') }}
                         </x-nav-link>
 
-                        @endauth
+                        @if(auth()->user()->role === 'admin')
+                            <x-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')">
+                                {{ __('Manajemen Pesanan') }}
+                            </x-nav-link>
+                        @endif
+
+                        @if(auth()->user()->role !== 'admin')
+                            <x-nav-link :href="route('my.orders.index')" :active="request()->routeIs('my.orders.*')">
+                                {{ __('Pesanan Saya') }}
+                            </x-nav-link>
+                        @endif
+                    @endauth
                 </div>
             </div>
 
@@ -58,6 +69,18 @@
                         </x-slot>
 
                         <x-slot name="content">
+                            @if(auth()->user()->role === 'admin')
+                                <x-dropdown-link :href="route('admin.orders.index')">
+                                    {{ __('Manajemen Pesanan') }}
+                                </x-dropdown-link>
+                            @endif
+
+                            @if(auth()->user()->role !== 'admin')
+                                <x-dropdown-link :href="route('my.orders.index')">
+                                    {{ __('Pesanan Saya') }}
+                                </x-dropdown-link>
+                            @endif
+
                             <x-dropdown-link :href="route('profile.edit')">
                                 {{ __('Profile') }}
                             </x-dropdown-link>
@@ -112,7 +135,18 @@
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
 
-                @endauth
+                @if(auth()->user()->role === 'admin')
+                    <x-responsive-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')">
+                        {{ __('Manajemen Pesanan') }}
+                    </x-responsive-nav-link>
+                @endif
+                
+                @if(auth()->user()->role !== 'admin')
+                    <x-responsive-nav-link :href="route('my.orders.index')">
+                        {{ __('Pesanan Saya') }}
+                    </x-responsive-nav-link>
+                @endif
+            @endauth
         </div>
 
         @auth
@@ -123,6 +157,12 @@
                 </div>
 
                 <div class="mt-3 space-y-1">
+                    @if(auth()->user()->role !== 'admin')
+                        <x-responsive-nav-link :href="route('my.orders.index')">
+                            {{ __('Pesanan Saya') }}
+                        </x-responsive-nav-link>
+                    @endif
+                    
                     <x-responsive-nav-link :href="route('profile.edit')">
                         {{ __('Profile') }}
                     </x-responsive-nav-link>
