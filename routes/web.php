@@ -27,5 +27,7 @@ Route::view('/admin/dashboard', 'admin.dashboard')
     ->middleware(['auth', 'verified'])
     ->name('admin.dashboard');
 
+Route::get('/my/orders', [\App\Http\Controllers\MyOrderController::class, 'index'])->name('my.orders.index');
+Route::get('/my/orders/{order}', [\App\Http\Controllers\MyOrderController::class, 'show'])->name('my.orders.show');
 
 require __DIR__.'/auth.php';
