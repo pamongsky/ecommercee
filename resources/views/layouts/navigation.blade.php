@@ -14,38 +14,42 @@
                 </div>
 
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    
+                    <x-nav-link
+                        :href="route('shop.index')"
+                        :active="request()->routeIs('shop.index')">
+                        {{ __('Katalog') }}
+                    </x-nav-link>
+
+                    <x-nav-link
+                        :href="route('cart.index')"
+                        :active="request()->routeIs('cart.index')">
+                        {{ __('Keranjang') }}
+                    </x-nav-link>
+
                     @auth
                         @php
                             $dashboardRoute = auth()->user()->role === 'admin'
                                 ? route('admin.dashboard')
                                 : route('dashboard');
                         @endphp
-                        
-                        {{-- Tautan Dashboard --}}
                         <x-nav-link
                             :href="$dashboardRoute"
                             :active="request()->routeIs('dashboard') || request()->routeIs('admin.dashboard')">
                             {{ __('Dashboard') }}
                         </x-nav-link>
 
-                        {{-- 🔥 [PEKERJAAN ADMIN] MANAJEMEN PESANAN (Hanya Admin) --}}
                         @if(auth()->user()->role === 'admin')
                             <x-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')">
                                 {{ __('Manajemen Pesanan') }}
                             </x-nav-link>
                         @endif
 
-                        {{-- 🛒 [PEKERJAAN SHOP] KERANJANG (Cart) --}}
-                        <x-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.index')">
-                            {{ __('Keranjang') }}
-                        </x-nav-link>
-
-                    @else
-                        <x-nav-link
-                            :href="route('shop.index')"
-                            :active="request()->routeIs('shop.index')">
-                            {{ __('Home') }}
-                        </x-nav-link>
+                        @if(auth()->user()->role !== 'admin')
+                            <x-nav-link :href="route('my.orders.index')" :active="request()->routeIs('my.orders.*')">
+                                {{ __('Pesanan Saya') }}
+                            </x-nav-link>
+                        @endif
                     @endauth
                 </div>
             </div>
@@ -65,15 +69,12 @@
                         </x-slot>
 
                         <x-slot name="content">
-                            
-                            {{-- 🔥 [PEKERJAAN ADMIN] Dropdown Link untuk Manajemen Pesanan (Hanya Admin) --}}
                             @if(auth()->user()->role === 'admin')
                                 <x-dropdown-link :href="route('admin.orders.index')">
                                     {{ __('Manajemen Pesanan') }}
                                 </x-dropdown-link>
                             @endif
 
-                            {{-- 📦 [PEKERJAAN USER] Dropdown Link untuk Pesanan Saya (My Orders) --}}
                             @if(auth()->user()->role !== 'admin')
                                 <x-dropdown-link :href="route('my.orders.index')">
                                     {{ __('Pesanan Saya') }}
@@ -87,7 +88,7 @@
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault(); this.closest('form').submit();">
+                                        onclick="event.preventDefault(); this.closest('form').submit();">
                                     {{ __('Log Out') }}
                                 </x-dropdown-link>
                             </form>
@@ -114,32 +115,37 @@
 
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
+            
+            <x-responsive-nav-link
+                :href="route('shop.index')"
+                :active="request()->routeIs('shop.index')">
+                {{ __('Katalog') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link
+                :href="route('cart.index')"
+                :active="request()->routeIs('cart.index')">
+                {{ __('Keranjang') }}
+            </x-responsive-nav-link>
+
             @auth
-                {{-- Tautan Dashboard Responsif --}}
                 <x-responsive-nav-link
                     :href="auth()->user()->role === 'admin' ? route('admin.dashboard') : route('dashboard')"
                     :active="request()->routeIs('dashboard') || request()->routeIs('admin.dashboard')">
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
 
-                {{-- 🔥 [PEKERJAAN ADMIN] Responsive Link Manajemen Pesanan (Hanya Admin) --}}
                 @if(auth()->user()->role === 'admin')
                     <x-responsive-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')">
                         {{ __('Manajemen Pesanan') }}
                     </x-responsive-nav-link>
                 @endif
-
-                {{-- 🛒 [PEKERJAAN SHOP] Responsive Link Keranjang (Cart) --}}
-                <x-responsive-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.index')">
-                    {{ __('Keranjang') }}
-                </x-responsive-nav-link>
-
-            @else
-                <x-responsive-nav-link
-                    :href="route('shop.index')"
-                    :active="request()->routeIs('shop.index')">
-                    {{ __('Home') }}
-                </x-responsive-nav-link>
+                
+                @if(auth()->user()->role !== 'admin')
+                    <x-responsive-nav-link :href="route('my.orders.index')">
+                        {{ __('Pesanan Saya') }}
+                    </x-responsive-nav-link>
+                @endif
             @endauth
         </div>
 
@@ -151,7 +157,6 @@
                 </div>
 
                 <div class="mt-3 space-y-1">
-                    {{-- 📦 [PEKERJAAN USER] Responsive Link Pesanan Saya --}}
                     @if(auth()->user()->role !== 'admin')
                         <x-responsive-nav-link :href="route('my.orders.index')">
                             {{ __('Pesanan Saya') }}
@@ -165,7 +170,7 @@
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault(); this.closest('form').submit();">
+                                onclick="event.preventDefault(); this.closest('form').submit();">
                             {{ __('Log Out') }}
                         </x-responsive-nav-link>
                     </form>
