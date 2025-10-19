@@ -1,81 +1,81 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-
-// --- CONTROLLER UMUM ---
 use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ShopController;
-use App\Http\Controllers\CartController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Middleware\IsAdmin; 
+use App\Http\Controllers\OrderController as UserOrderController; 
+
+use App\Http\Controllers\CartController; 
 use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\MyOrderController;
-
-// --- CONTROLLER & MIDDLEWARE ADMIN ---
-use App\Http\Controllers\Admin\OrderController as AdminOrderController;
-use App\Http\Middleware\IsAdmin;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
-
-// --- ROUTE UTAMA & KATALOG (Publik) ---
-Route::get('/', [ShopController::class, 'index'])->name('shop.index');
-Route::get('/p/{product:slug}', [ShopController::class, 'show'])->name('shop.show');
 
 
-// --- ROUTE KERANJANG (Publik) ---
-Route::prefix('cart')->name('cart.')->group(function () {
-    Route::get('/', [CartController::class,'index'])->name('index');
-    Route::post('/add/{product}', [CartController::class,'add'])->name('add');
-    Route::patch('/{product}', [CartController::class,'update'])->name('update');
-    Route::delete('/{product}', [CartController::class,'remove'])->name('remove');
-    Route::delete('/', [CartController::class,'clear'])->name('clear');
-});
+Route::get('/dashboard', function () {
+    // sudah login & verified
+    return Auth::user()->role === 'admin'
+        ? redirect()->route('admin.dashboard')      // admin -> admin dashboard
+        : redirect()->route('shop.index');          // user -> katalog
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-
-// --- ROUTE YANG BUTUH LOGIN ---
 Route::middleware('auth')->group(function () {
-    
-    // --- Dashboard Redirect ---
-    Route::get('/dashboard', function () {
-        return Auth::user()->role === 'admin'
-            ? redirect()->route('admin.dashboard')
-            : redirect()->route('shop.index');
-    })->middleware('verified')->name('dashboard');
-    
-    // --- Profile User ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
-    // --- Checkout & Success Page ---
+});
+
+Route::get('/', [ShopController::class, 'index'])->name('shop.index');       // katalog
+Route::get('/p/{product:slug}', [ShopController::class, 'show'])->name('shop.show');
+Route::get('/p/{product}', [ShopController::class, 'show'])->name('shop.show')->withoutMiddleware('auth'); // Asumsi p/{product} bisa diakses tanpa login
+
+
+Route::prefix('cart')->group(function () {
+    Route::get('/', [CartController::class,'index'])->name('cart.index');
+    Route::post('/add/{product}', [CartController::class,'add'])->name('cart.add');
+    Route::patch('/{product}', [CartController::class,'update'])->name('cart.update');
+    Route::delete('/{product}', [CartController::class,'remove'])->name('cart.remove');
+    Route::delete('/', [CartController::class,'clear'])->name('cart.clear');
+});
+
+Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class,'show'])->name('checkout.show');
     Route::post('/checkout', [CheckoutController::class,'store'])->name('checkout.store');
     Route::get('/order/success/{order}', [CheckoutController::class,'success'])->name('checkout.success');
-    
-    // --- Halaman 'Pesanan Saya' (User) ---
-    Route::get('/my/orders', [MyOrderController::class, 'index'])->name('my.orders.index');
-    Route::get('/my/orders/{order}', [MyOrderController::class, 'show'])->name('my.orders.show');
-    
 });
 
 
-// --- ROUTE KHUSUS ADMIN ---
 Route::middleware(['auth', 'verified', IsAdmin::class])->prefix('admin')->name('admin.')->group(function () {
     
     Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
-    
-    // --- Admin: Manajemen Pesanan ---
-    Route::get('/orders', [AdminOrderController::class,'index'])->name('orders.index');
-    Route::get('/orders/{order}', [AdminOrderController::class,'show'])->name('orders.show');
-    Route::patch('/orders/{order}/status', [AdminOrderController::class,'updateStatus'])->name('orders.updateStatus');
-    
-    // (Tambahkan route admin lainnya di sini jika ada, misal CRUD Produk/Kategori)
-    
+    Route::get('/orders', [OrderController::class,'index'])->name('orders.index');
+    Route::get('/orders/{order}', [OrderController::class,'show'])->name('orders.show');
+    Route::patch('/orders/{order}/status', [OrderController::class,'updateStatus'])->name('orders.updateStatus');
+    // END: ADMIN ORDERS
+
 });
 
 
-// --- FILE AUTH BAWAAN ---
+Route::prefix('cart')->name('cart.')->group(function () {
+    // FIX: Route cart.index yang menyebabkan error
+    Route::get('/', [CartController::class, 'index'])->name('index'); 
+
+    // Route Keranjang lainnya (asumsi)
+    // Route::post('add/{product}', [CartController::class, 'add'])->name('add');
+    // Route::patch('update/{item}', [CartController::class, 'update'])->name('update');
+    // Route::delete('remove/{item}', [CartController::class, 'remove'])->name('remove');
+});
+
+
+Route::middleware(['auth', 'verified'])->prefix('my')->name('my.')->group(function () {
+    // Route my.orders.index
+    Route::get('orders', [UserOrderController::class, 'index'])->name('orders.index');
+    // Route my.orders.show
+    Route::get('orders/{order}', [UserOrderController::class, 'show'])->name('orders.show');
+    
+    // Asumsi: Route untuk Checkout & Payment (Tugas Orang A)
+    // Route::get('checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    // Route::post('checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+});
+
+
 require __DIR__.'/auth.php';

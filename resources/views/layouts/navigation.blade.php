@@ -4,17 +4,18 @@
             <div class="flex">
                 <div class="shrink-0 flex items-center">
                     @php
+                        // Logika Home Route
                         $homeRoute = auth()->check()
                             ? (auth()->user()->role === 'admin' ? route('admin.dashboard') : route('dashboard'))
                             : route('shop.index');
                     @endphp
                     <a href="{{ $homeRoute }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                        <img src="{{ asset('logo.png') }}" alt="Logo" class="h-12 w-auto">
                     </a>
                 </div>
 
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    
+
                     <x-nav-link
                         :href="route('shop.index')"
                         :active="request()->routeIs('shop.index')">
@@ -29,23 +30,23 @@
 
                     @auth
                         @php
-                            $dashboardRoute = auth()->user()->role === 'admin'
-                                ? route('admin.dashboard')
-                                : route('dashboard');
+                            $isAdmin = auth()->user()->role === 'admin';
+                            $dashboardRoute = $isAdmin ? route('admin.dashboard') : route('dashboard');
                         @endphp
+
                         <x-nav-link
                             :href="$dashboardRoute"
                             :active="request()->routeIs('dashboard') || request()->routeIs('admin.dashboard')">
                             {{ __('Dashboard') }}
                         </x-nav-link>
 
-                        @if(auth()->user()->role === 'admin')
+                        @if ($isAdmin)
                             <x-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')">
                                 {{ __('Manajemen Pesanan') }}
                             </x-nav-link>
                         @endif
 
-                        @if(auth()->user()->role !== 'admin')
+                        @if (!$isAdmin)
                             <x-nav-link :href="route('my.orders.index')" :active="request()->routeIs('my.orders.*')">
                                 {{ __('Pesanan Saya') }}
                             </x-nav-link>
@@ -55,6 +56,7 @@
             </div>
 
             @auth
+                {{-- Bagian Dropdown Profil --}}
                 <div class="hidden sm:flex sm:items-center sm:ms-6">
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
@@ -96,12 +98,14 @@
                     </x-dropdown>
                 </div>
             @else
+                {{-- Tombol Login/Register untuk Guest --}}
                 <div class="hidden sm:flex sm:items-center sm:ms-6">
                     <a href="{{ route('login') }}" class="text-gray-600 hover:text-gray-800 me-4">Login</a>
                     <a href="{{ route('register') }}" class="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Register</a>
                 </div>
             @endauth
 
+            {{-- Hamburger Button --}}
             <div class="-me-2 flex items-center sm:hidden">
                 <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
@@ -113,9 +117,10 @@
         </div>
     </div>
 
+    {{-- BLOK RESPONSIVE NAVIGASI (RESOLVED) --}}
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            
+
             <x-responsive-nav-link
                 :href="route('shop.index')"
                 :active="request()->routeIs('shop.index')">
@@ -129,26 +134,32 @@
             </x-responsive-nav-link>
 
             @auth
+                @php
+                    $isAdmin = auth()->user()->role === 'admin';
+                    $dashboardRoute = $isAdmin ? route('admin.dashboard') : route('dashboard');
+                @endphp
+
                 <x-responsive-nav-link
-                    :href="auth()->user()->role === 'admin' ? route('admin.dashboard') : route('dashboard')"
+                    :href="$dashboardRoute"
                     :active="request()->routeIs('dashboard') || request()->routeIs('admin.dashboard')">
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
 
-                @if(auth()->user()->role === 'admin')
+                @if ($isAdmin)
                     <x-responsive-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')">
                         {{ __('Manajemen Pesanan') }}
                     </x-responsive-nav-link>
                 @endif
-                
-                @if(auth()->user()->role !== 'admin')
-                    <x-responsive-nav-link :href="route('my.orders.index')">
+
+                @if (!$isAdmin)
+                    <x-responsive-nav-link :href="route('my.orders.index')" :active="request()->routeIs('my.orders.*')">
                         {{ __('Pesanan Saya') }}
                     </x-responsive-nav-link>
                 @endif
             @endauth
         </div>
 
+        {{-- Bagian User Dropdown (Responsive) / Login & Register --}}
         @auth
             <div class="pt-4 pb-1 border-t border-gray-200">
                 <div class="px-4">
@@ -157,12 +168,17 @@
                 </div>
 
                 <div class="mt-3 space-y-1">
+                    @if(auth()->user()->role === 'admin')
+                        <x-responsive-nav-link :href="route('admin.orders.index')">
+                            {{ __('Manajemen Pesanan') }}
+                        </x-responsive-nav-link>
+                    @endif
                     @if(auth()->user()->role !== 'admin')
                         <x-responsive-nav-link :href="route('my.orders.index')">
                             {{ __('Pesanan Saya') }}
                         </x-responsive-nav-link>
                     @endif
-                    
+
                     <x-responsive-nav-link :href="route('profile.edit')">
                         {{ __('Profile') }}
                     </x-responsive-nav-link>
