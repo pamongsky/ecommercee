@@ -22,4 +22,11 @@ class Order extends Model
         return number_format($this->grand_total,0,',','.');
     }
 
+    public function items(){
+        return $this->hasMany(OrderItem::class);
+    }
+
+    
+
+
 }

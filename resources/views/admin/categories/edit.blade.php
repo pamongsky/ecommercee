@@ -1,17 +1,28 @@
 <x-app-layout>
-    <x-slot name="header"><h2 class="font-semibold text-xl">Edit Kategori</h2></x-slot>
-
-    <div class="p-6">
-        <form method="POST" action="{{ route('admin.categories.update', $category) }}">
-            @csrf
-            @method('PUT')
-            <div class="mb-4">
-                <label class="block mb-1">Nama Kategori</label>
-                <input type="text" name="name" class="w-full border p-2 rounded" value="{{ old('name', $category->name) }}">
-                @error('name') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-            </div>
-            <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-black rounded">Update</button>
-            <a href="{{ route('admin.categories.index') }}" class="ms-2 text-gray-600">Batal</a>
-        </form>
+  <x-slot name="header">
+    <div class="flex items-center justify-between">
+      <h2 class="font-semibold text-xl text-slate-900">Edit Kategori</h2>
+      <a href="{{ route('admin.categories.index') }}" class="text-sm text-slate-600 hover:underline">← Kembali</a>
     </div>
+  </x-slot>
+
+  <div class="p-6">
+    <form action="{{ route('admin.categories.update', $category) }}" method="POST"
+          class="bg-white border rounded-2xl shadow-sm p-4 max-w-3xl">
+      @csrf @method('PUT')
+
+      <label class="block text-sm font-medium text-slate-700">Nama Kategori</label>
+      <input type="text" name="name" value="{{ old('name', $category->name) }}" required
+             class="mt-1 w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-200">
+
+      @error('name')
+        <p class="text-sm text-rose-600 mt-1">{{ $message }}</p>
+      @enderror
+
+      <div class="mt-4 flex items-center gap-2">
+        <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Update</button>
+        <a href="{{ route('admin.categories.index') }}" class="px-4 py-2 rounded-lg border hover:bg-slate-50">Batal</a>
+      </div>
+    </form>
+  </div>
 </x-app-layout>

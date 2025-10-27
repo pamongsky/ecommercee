@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/', [ShopController::class, 'index'])->name('shop.index');       // katalog
+Route::get('/home', [ShopController::class, 'index'])->name('home');
 Route::get('/p/{product:slug}', [ShopController::class, 'show'])->name('shop.show');
 Route::get('/p/{product}', [ShopController::class, 'show'])->name('shop.show')->withoutMiddleware('auth'); // Asumsi p/{product} bisa diakses tanpa login
 
@@ -76,6 +77,10 @@ Route::middleware(['auth', 'verified'])->prefix('my')->name('my.')->group(functi
     // Route::get('checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     // Route::post('checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 });
+
+
+
+
 
 
 require __DIR__.'/auth.php';

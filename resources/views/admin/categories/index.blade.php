@@ -1,45 +1,59 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl">Kategori</h2>
-    </x-slot>
-
-    <div class="p-6">
-        <a href="{{ route('admin.categories.create') }}" class="px-3 py-2 bg-blue-600 text-black rounded">
-            + Tambah Kategori
-        </a>
-
-        @if(session('success'))
-            <div class="mt-3 p-3 bg-green-100 text-green-800 rounded">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <table class="w-full mt-4 border text-sm">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="p-2 border">Nama</th>
-                    <th class="p-2 border w-32">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-            @forelse($categories as $c)
-                <tr>
-                    <td class="p-2 border">{{ $c->name }}</td>
-                    <td class="p-2 border">
-                        <a href="{{ route('admin.categories.edit', $c) }}" class="text-blue-600">Edit</a>
-                        <form action="{{ route('admin.categories.destroy', $c) }}" method="POST" class="inline"
-                              onsubmit="return confirm('Hapus kategori ini?')">
-                            @csrf @method('DELETE')
-                            <button class="text-red-600 ms-2">Hapus</button>
-                        </form>
-                    </td>
-                </tr>
-            @empty
-                <tr><td colspan="2" class="p-3 text-center border">Belum ada kategori.</td></tr>
-            @endforelse
-            </tbody>
-        </table>
-
-        <div class="mt-4">{{ $categories->links() }}</div>
+  <x-slot name="header">
+    <div class="flex items-center justify-between">
+      <h2 class="font-semibold text-xl text-slate-900">Kelola Kategori</h2>
+      <a href="{{ route('admin.categories.create') }}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+        <span class="text-lg leading-none">＋</span> Tambah Kategori
+      </a>
     </div>
+  </x-slot>
+
+  <div class="p-6">
+    <div class="bg-white border rounded-2xl shadow-sm overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-slate-600">
+          <tr>
+            <th class="p-3 text-left w-[60px]">No</th>
+            <th class="p-3 text-left">Nama</th>
+            <th class="p-3 text-left w-[180px]">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          @forelse($categories as $cat)
+            @php
+              $number = method_exists($categories, 'firstItem')
+                ? $categories->firstItem() + $loop->index   // paginate -> urutan global
+                : $loop->iteration;                          // collection biasa -> 1,2,3
+            @endphp
+            <tr class="hover:bg-slate-50">
+              <td class="p-3 font-medium text-slate-800"> {{ $number }} </td>
+              <td class="p-3 text-slate-800"> {{ $cat->name }} </td>
+              <td class="p-3">
+                <div class="flex gap-2">
+                  <a href="{{ route('admin.categories.edit', $cat) }}"
+                     class="px-3 py-1.5 rounded-md border hover:bg-slate-50">Edit</a>
+                  <form action="{{ route('admin.categories.destroy', $cat) }}" method="POST"
+                        onsubmit="return confirm('Hapus kategori ini?')">
+                    @csrf @method('DELETE')
+                    <button class="px-3 py-1.5 rounded-md border text-rose-700 hover:bg-rose-50">Hapus</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          @empty
+            <tr>
+              <td colspan="3" class="p-8 text-center text-slate-500">Belum ada kategori.</td>
+            </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
+
+    @if(method_exists($categories, 'links'))
+      <div class="mt-4">
+        {{ $categories->onEachSide(1)->links() }}
+      </div>
+    @endif
+  </div>
 </x-app-layout>

@@ -42,11 +42,11 @@
                     @foreach ($order->items as $item)
                     <li class="py-4 flex">
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900">{{ $item->product->name ?? 'Produk Dihapus' }}</p>
-                            <p class="text-sm text-gray-500">Qty: {{ $item->quantity }} x Rp{{ number_format($item->price, 0, ',', '.') }}</p>
+                            <p class="text-sm font-medium text-gray-900">{{ $item->product->name ?? $item->product_name_snapshot }}</p>
+                            <p class="text-sm text-gray-500">Qty: {{ $item->qty }} x Rp{{ number_format($item->price_snapshot, 0, ',', '.') }}</p>
                         </div>
                         <div class="text-sm font-semibold text-gray-900">
-                            Rp{{ number_format($item->price * $item->quantity, 0, ',', '.') }}
+                            Rp{{ number_format($item->subtotal, 0, ',', '.') }}
                         </div>
                     </li>
                     @endforeach
@@ -60,17 +60,18 @@
             <div class="bg-white shadow sm:rounded-lg p-5">
                 <h3 class="text-lg leading-6 font-medium text-gray-900 mb-3">Alamat Pengiriman</h3>
                 <address class="text-sm text-gray-900 not-italic">
-                    <p class="font-semibold">{{ $order->shipping_address['name'] ?? 'N/A' }}</p>
-                    <p>{{ $order->shipping_address['phone'] ?? 'N/A' }}</p>
-                    <p>{{ $order->shipping_address['address'] ?? 'Alamat tidak lengkap' }}</p>
-                    <p>{{ $order->shipping_address['city'] ?? '' }}, {{ $order->shipping_address['zip_code'] ?? '' }}</p>
+                    <p class="font-semibold">{{ $order->recipient_name ?? 'N/A' }}</p>
+                    <p>{{ $order->phone ?? 'N/A' }}</p>
+                    <p>{{ $order->address_text ?? 'Alamat tidak lengkap' }}</p>
+                    @if($order->note)
+                        <p class="mt-2 text-xs italic text-gray-600">Catatan: {{ $order->note }}</p>
+                    @endif
                 </address>
             </div>
 
             <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 shadow sm:rounded-lg">
                 <h3 class="text-lg leading-6 font-medium text-yellow-800 mb-3">Ubah Status Pesanan</h3>
                 
-                {{-- Form untuk mengirim PATCH request ke route admin.orders.updateStatus --}}
                 <form action="{{ route('admin.orders.updateStatus', $order) }}" method="POST">
                     @csrf
                     @method('PATCH') 

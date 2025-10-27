@@ -10,14 +10,32 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     
+                    {{-- Blok PHP untuk menentukan kelas status --}}
+                    @php
+                        $statusClasses = '';
+                        switch ($order->status) {
+                            case 'processing':
+                                $statusClasses = 'bg-yellow-100 text-yellow-800';
+                                break;
+                            case 'completed':
+                                $statusClasses = 'bg-green-100 text-green-800';
+                                break;
+                            case 'shipped': // Tambahkan status umum lain jika ada
+                                $statusClasses = 'bg-blue-100 text-blue-800';
+                                break;
+                            default:
+                                $statusClasses = 'bg-red-100 text-red-800'; // Termasuk 'cancelled' atau 'failed'
+                                break;
+                        }
+                    @endphp
+                    
                     <h3 class="text-lg font-bold mb-4 border-b pb-2">Informasi Umum</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div>
                             <p class="text-sm text-gray-500">Status:</p>
-                            <span class="px-3 py-1 text-sm font-semibold rounded-full 
-                                @if($order->status == 'processing') bg-yellow-100 text-yellow-800
-                                @elseif($order->status == 'completed') bg-green-100 text-green-800
-                                @else bg-red-100 text-red-800 @endif">
+                            
+                            {{-- MENGGANTI BLOK @IF DENGAN VARIABEL $statusClasses --}}
+                            <span class="px-3 py-1 text-sm font-semibold rounded-full {{ $statusClasses }}">
                                 {{ ucfirst($order->status) }}
                             </span>
                         </div>

@@ -1,87 +1,84 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl">Katalog Produk</h2>
-    </x-slot>
+{{-- resources/views/shop/index.blade.php --}}
+@extends('layouts.app')
 
-    <div class="p-6 space-y-4">
-        {{-- Filter & Search --}}
-        <form method="GET" action="{{ route('shop.index') }}" class="flex gap-2">
+@section('content')
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+
+    {{-- BAR PENCARIAN & FILTER --}}
+    <form action="{{ route('shop.index') }}" method="GET" class="mb-4">
+        <div class="flex items-center gap-2">
             <input
                 type="text"
                 name="q"
+                value="{{ request('q') }}"
                 placeholder="Cari produk..."
-                value="{{ $q ?? request('q') }}"
-                class="border p-2 rounded w-full"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300"
+            />
+
+            <select
+                name="category"
+                class="min-w-[170px] rounded-lg border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-slate-300"
             >
-            <select name="category" class="border p-2 rounded">
                 <option value="">Semua Kategori</option>
                 @foreach($categories as $c)
-                    <option value="{{ $c->id }}" @selected(($categoryId ?? request('category')) == $c->id)>
+                    <option value="{{ $c->id }}" {{ (string)request('category')===(string)$c->id ? 'selected' : '' }}>
                         {{ $c->name }}
                     </option>
                 @endforeach
             </select>
-            <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
-                Filter
-            </button>
-        </form>
 
-        {{-- Grid Produk --}}
-        @if($products->count())
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                @foreach($products as $p)
-                    <div class="border rounded hover:shadow transition p-3">
-                        <a
-                            {{-- Opsi A: pakai binding model --}}
-                            href="{{ route('shop.show', $p) }}"
-                            {{-- Opsi B: pakai id -> href="{{ route('shop.show', ['product' => $p->id]) }}" --}}
-                            class="block"
-                        >
-                            {{-- Kotak gambar rasio 1:1 --}}
-                            <div class="w-full aspect-square bg-gray-100 overflow-hidden rounded">
-                                @if($p->image_path)
-                                    <img
-                                        src="{{ asset('storage/'.$p->image_path) }}"
-                                        alt="{{ $p->name }}"
-                                        class="w-full h-full object-cover"
-                                        loading="lazy"
-                                    >
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
-                                        Tidak ada gambar
-                                    </div>
-                                @endif
-                            </div>
+            <button
+                type="submit"
+                class="min-w-[170px] rounded-lg border border-slate-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-slate-300"
+            >Filter</button>
+        </div>
+    </form>
 
-                            <div class="mt-3 font-semibold line-clamp-2">{{ $p->name }}</div>
-                            <div class="text-sm text-gray-500">{{ $p->category->name }}</div>
-                            {{-- Memperbaiki harga agar formatnya benar, karena $p->price_formatted mungkin tidak ada --}}
-                            <div class="mt-1 font-bold">Rp {{ number_format($p->price, 0, ',', '.') }}</div>
-                            <div class="text-xs text-gray-500">Stok: {{ $p->stock }}</div>
-                        </a>
+    {{-- GRID PRODUK --}}
+    @if($products->count())
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            @foreach($products as $p)
+                @php
+                    $img = ($p->image_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($p->image_path))
+                        ? asset('storage/'.$p->image_path)
+                        : 'https://placehold.co/600x450/png?text=No+Image';
+                @endphp
 
-                        {{-- (Opsional) tombol tambah ke keranjang --}}
-                        {{-- BLOK INI DINONAKTIFKAN KARENA ROUTE cart.add BELUM DIDEFINISIKAN/AKTIF --}}
-                        @if (false) 
-                        <form action="{{ route('cart.add', $p) }}" method="POST" class="mt-3">
-                            @csrf
-                            <button class="w-full px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-sm">
-                                + Keranjang
-                            </button>
-                        </form>
-                        @endif 
-                        {{-- END OF BLOK NONAKTIF --}}
-                        
+                <a href="{{ route('shop.show', $p) }}"
+                   class="group rounded-2xl border bg-white shadow-sm hover:shadow-md transition overflow-hidden">
+                    {{-- gambar dibuat proporsional & tidak besar-besar --}}
+                    <div class="w-full aspect-[4/3] bg-slate-50 overflow-hidden">
+                        <img src="{{ $img }}"
+                             alt="{{ $p->name }}"
+                             loading="lazy"
+                             class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300">
                     </div>
-                @endforeach
-            </div>
 
-            {{-- Pagination + bawa query filter --}}
-            <div class="mt-4">
-                {{ $products->appends(request()->only('q','category'))->links() }}
-            </div>
-        @else
-            <p class="text-gray-500">Produk tidak ditemukan.</p>
-        @endif
-    </div>
-</x-app-layout>
+                    <div class="p-3">
+                        <div class="text-[11px] text-slate-500 mb-1">
+                            {{ optional($p->category)->name ?? 'Lainnya' }}
+                        </div>
+
+                        <div class="text-sm font-medium text-slate-900 line-clamp-2 min-h-[2.5rem]">
+                            {{ $p->name }}
+                        </div>
+
+                        <div class="mt-2 font-semibold">
+                            Rp {{ number_format($p->price, 0, ',', '.') }}
+                        </div>
+
+                        <div class="mt-1 text-[12px] text-slate-500">Stok: {{ $p->stock }}</div>
+                    </div>
+                </a>
+            @endforeach
+        </div>
+
+        {{-- PAGINASI --}}
+        <div class="mt-4">
+            {{ $products->onEachSide(1)->links() }}
+        </div>
+    @else
+        <div class="text-center text-slate-500 py-10">Produk tidak ditemukan.</div>
+    @endif
+</div>
+@endsection
